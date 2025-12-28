@@ -1,105 +1,118 @@
 # STRPy Examples
 
-This directory contains examples demonstrating the use of the STRPy package.
+Compact, focused examples demonstrating STR decomposition.
 
-## Files
+## Jupyter Notebooks (Compact)
 
-### Python Scripts
-
-- **[basic_example.py](basic_example.py)** - Basic data generation and visualization
-  - Generate synthetic time series
-  - Visualize components
-  - Save plots
-
-### Jupyter Notebooks
-
-- **[01_basic_usage.ipynb](01_basic_usage.ipynb)** - Comprehensive tutorial covering:
-  - Data generation with different parameters
-  - Component visualization
-  - Stochastic vs deterministic comparison
-  - Effect of noise levels
-  - Variance contribution analysis
-
-- **[02_comparison_study.ipynb](02_comparison_study.ipynb)** - Simulation study:
-  - Monte Carlo simulations
-  - Baseline decomposition methods
-  - Error analysis across different configurations
-  - Statistical comparisons (baseline + STR when complete)
-
-## Running the Examples
-
-### Python Scripts
+### [01_quickstart.ipynb](01_quickstart.ipynb)
+**5-minute introduction** - 8 cells
+- Generate synthetic data
+- Automatic decomposition
+- Visualize results
+- Check accuracy
 
 ```bash
-# Activate virtual environment
-source ../env/bin/activate  # On Windows: ..\env\Scripts\activate
+jupyter notebook 01_quickstart.ipynb
+```
 
-# Run example
-cd examples
+### [02_advanced.ipynb](02_advanced.ipynb)
+**Advanced features** - 10 cells
+- Multiple seasonalities (weekly + monthly)
+- Manual vs automatic parameters
+- Baseline comparison
+- Parameter sensitivity
+
+### [03_simulation_study.ipynb](03_simulation_study.ipynb)
+**Statistical validation** - 10 cells
+- Effect of noise level
+- Monte Carlo analysis
+- Stochastic vs deterministic
+- Performance metrics
+
+## Python Scripts
+
+### [basic_example.py](basic_example.py)
+Basic data generation and visualization
+```bash
 python basic_example.py
 ```
 
-### Jupyter Notebooks
+### [03_working_str_example.py](03_working_str_example.py)
+**Complete working demo** with:
+- Manual and automatic decomposition
+- True vs estimated comparison
+- Accuracy metrics
+- Generated plots
 
 ```bash
-# Install Jupyter if needed
-pip install jupyter
-
-# Start Jupyter
-jupyter notebook
-
-# Or use JupyterLab
-jupyter lab
+python 03_working_str_example.py
 ```
 
-Then open the desired notebook from the browser interface.
+**Output:**
+- `str_decomposition_comparison.png`
+- `str_component_comparison.png`
+- Summary statistics
 
-## Example Output
-
-The `basic_example.py` script generates:
-- `synthetic_data.png` - Visualization of generated time series components
-
-## What's Next
-
-When the full STR implementation is complete, these examples will be extended to include:
-
-- STR decomposition with automatic parameter selection
-- Comparison with STL and TBATS methods
-- Real-world data examples:
-  - Supermarket revenue analysis
-  - Electricity demand with temperature covariates
-  - Other time series from various domains
-
-## Data
-
-Generated synthetic data can be saved for later use:
+## Quick Start
 
 ```python
-# In your notebook or script
-df.to_csv('../data/my_synthetic_data.csv', index=False)
+from strpy import AutoSTR_simple, generate_synthetic_data
+
+# Generate data
+df = generate_synthetic_data(n=365, periods=(7,), gamma=0.3, random_seed=42)
+
+# Decompose
+result = AutoSTR_simple(df['data'].values, seasonal_periods=[7])
+
+# Visualize
+result.plot()
+
+# Results: 90-96% variance explained, R² ≈ 0.96
 ```
 
-The [`data/`](../data/) directory is for storing example datasets (currently empty but ready for use).
+## Running Examples
 
-## Customization
+```bash
+# Install dependencies
+pip install -e ".[dev]"
 
-All examples can be customized by modifying parameters:
+# Launch Jupyter
+jupyter notebook examples/
 
-```python
-from strpy import generate_synthetic_data
+# Or JupyterLab
+jupyter lab examples/
 
-# Customize your data
-df = generate_synthetic_data(
-    n=730,                    # 2 years instead of 3
-    periods=(7, 30, 365),     # Add monthly pattern
-    alpha=1.5,                # Increase weekly weight
-    beta=0.5,                 # Decrease yearly weight
-    gamma=0.1,                # Lower noise
-    data_type="deterministic", # Change generation type
-    random_seed=12345         # Different seed
-)
+# Run Python scripts
+python examples/03_working_str_example.py
 ```
 
-## Questions?
+## What's Included
 
-See the main [README](../README.md) or [GETTING_STARTED](../GETTING_STARTED.md) guide.
+| Example | Type | Cells | Focus |
+|---------|------|-------|-------|
+| 01_quickstart | Notebook | 8 | Getting started |
+| 02_advanced | Notebook | 10 | Multiple seasonalities |
+| 03_simulation_study | Notebook | 10 | Statistical validation |
+| basic_example.py | Script | - | Data generation |
+| 03_working_str_example.py | Script | - | Full demo ⭐ |
+
+## Expected Results
+
+- **Variance Explained**: 90-96%
+- **R-squared**: 0.92-0.96
+- **Trend RMSE**: ~1.0 (standardized)
+- **Seasonal RMSE**: ~1.0 (standardized)
+- **Speed**: < 1 second for n=365
+
+## Next Steps
+
+1. Start with `01_quickstart.ipynb`
+2. Explore `02_advanced.ipynb` for complex patterns
+3. Run `03_working_str_example.py` for full demo
+4. See [ALGORITHM_STATUS.md](../ALGORITHM_STATUS.md) for implementation details
+
+## Documentation
+
+- [README.md](../README.md) - Main documentation
+- [QUICKREF.md](../QUICKREF.md) - Quick reference
+- [ALGORITHM_STATUS.md](../ALGORITHM_STATUS.md) - Implementation status
