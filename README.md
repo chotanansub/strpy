@@ -36,33 +36,63 @@ pip install -e ".[dev]"
 
 ## Quick Start
 
+> **✨ NEW: Working implementation now available!** See [ALGORITHM_STATUS.md](ALGORITHM_STATUS.md) for details.
+
 ```python
-import numpy as np
-from strpy import STR, AutoSTR
+from strpy import STR_decompose, AutoSTR_simple, generate_synthetic_data
 
 # Generate sample data
-n = 365 * 3
-t = np.arange(n)
-trend = 0.001 * t
-seasonal = 10 * np.sin(2 * np.pi * t / 365)
-noise = np.random.normal(0, 1, n)
-y = trend + seasonal + noise
+df = generate_synthetic_data(
+    n=365,
+    periods=(7,),  # Weekly seasonality
+    gamma=0.3,
+    random_seed=42
+)
 
-# Automatic STR decomposition
-result = AutoSTR(y, seasonal_periods=[7, 365])
+# Method 1: Automatic parameter selection (recommended)
+result = AutoSTR_simple(
+    df['data'].values,
+    seasonal_periods=[7],
+    n_trials=20
+)
+
+# Method 2: Manual parameters
+result = STR_decompose(
+    df['data'].values,
+    seasonal_periods=[7],
+    trend_lambda=1000.0,
+    seasonal_lambda=100.0
+)
 
 # Access components
-trend_component = result.trend
-seasonal_components = result.seasonal
-remainder = result.remainder
+print(f"Trend: {result.trend.shape}")
+print(f"Seasonal: {len(result.seasonal)} components")
+print(f"Variance explained: {100*(1-result.remainder.var()/df['data'].var()):.1f}%")
+
+# Visualize
+result.plot()
 ```
 
 ## Examples
 
-See the `examples/` directory for Jupyter notebooks demonstrating:
-- Basic decomposition with synthetic data
-- Supermarket revenue analysis
-- Electricity demand forecasting with temperature covariates
+See the `examples/` directory for:
+
+**Python Scripts:**
+- [basic_example.py](examples/basic_example.py) - Data generation and visualization
+- [03_working_str_example.py](examples/03_working_str_example.py) - **Working STR decomposition** ✨
+
+**Jupyter Notebooks:**
+- [01_basic_usage.ipynb](examples/01_basic_usage.ipynb) - Comprehensive data generation tutorial (24 cells)
+- [02_comparison_study.ipynb](examples/02_comparison_study.ipynb) - Simulation study and method comparison (19 cells)
+
+Run examples:
+```bash
+# Python scripts
+python examples/03_working_str_example.py
+
+# Jupyter notebooks
+jupyter notebook examples/
+```
 
 ## Method
 
