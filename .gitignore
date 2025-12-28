@@ -1,3 +1,4 @@
+# LaTeX
 *.aux
 *.bbl
 *.blg
@@ -6,11 +7,48 @@
 *.log
 *.out
 *.synctex.gz
-*.Rhistory
 *blx.bib
 *.bcf
 *.run.xml
+
+# R
+*.Rhistory
 *_cache
 *_files
 *.rds
 .Rproj.user
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+env/
+venv/
+ENV/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints
+
+# Project specific
+*.png
+!examples/*.png
