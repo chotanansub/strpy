@@ -72,15 +72,21 @@ def STR_decompose(
     D_trend_padded[:, :n] = D_trend
     D_components.append(trend_lambda * D_trend_padded)
 
-    # Seasonal regularization
+    # Seasonal regularization (second differences on the seasonal pattern itself)
     offset = n
     for i, period in enumerate(seasonal_periods):
         n_seasonal_cols = seasonal_matrices[i].shape[1]
 
-        # Penalize large coefficients
-        D_seasonal = np.eye(n_seasonal_cols)
-        D_seasonal_padded = np.zeros((n_seasonal_cols, X.shape[1]))
-        D_seasonal_padded[:, offset:offset + n_seasonal_cols] = D_seasonal
+        # Create difference operator for seasonal smoothness
+        # Apply difference operator to the PRODUCT: D @ (X_seasonal @ beta_seasonal)
+        # This is equivalent to: (D @ X_seasonal) @ beta_seasonal
+        X_seas = seasonal_matrices[i]
+        D_seasonal_pattern = create_difference_matrix(n, order=2, cyclic=True)
+        D_seasonal_transformed = D_seasonal_pattern @ X_seas
+
+        # Pad to full width
+        D_seasonal_padded = np.zeros((D_seasonal_transformed.shape[0], X.shape[1]))
+        D_seasonal_padded[:, offset:offset + n_seasonal_cols] = D_seasonal_transformed
         D_components.append(seasonal_lambda * D_seasonal_padded)
 
         offset += n_seasonal_cols
@@ -213,11 +219,20 @@ def AutoSTR_simple(
                 seasonal_lambda=seasonal_lambda
             )
 
-            # Simple AIC-like criterion: RSS + penalty for smoothness
+            # Scoring: prefer models with low remainder variance
+            # but penalize extreme smoothing
             rss = np.sum(result.remainder ** 2)
-            # Effective degrees of freedom (approximation)
-            edf = n / (1 + trend_lambda/1000)
-            score = n * np.log(rss / n) + 2 * edf
+
+            # Check if seasonal component has meaningful variance
+            seasonal_var = result.seasonal[0].var()
+            if seasonal_var < 0.01:  # Seasonal is too flat
+                score = np.inf  # Reject this solution
+            else:
+                # Use BIC-like criterion: log-likelihood + complexity penalty
+                log_likelihood = -n/2 * np.log(2*np.pi*rss/n) - n/2
+                # Penalty based on smoothness (higher lambda = simpler model)
+                complexity = -np.log(trend_lambda + 1) - np.log(seasonal_lambda + 1)
+                score = -log_likelihood + complexity
 
             if score < best_score:
                 best_score = score

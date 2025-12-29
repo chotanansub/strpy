@@ -178,27 +178,23 @@ def create_difference_matrix(n: int, order: int = 2, cyclic: bool = False) -> np
 
 def center_seasonal(seasonal: np.ndarray, period: int) -> np.ndarray:
     """
-    Center seasonal component to have zero mean within each period.
+    Center seasonal component to have zero mean.
 
     Parameters
     ----------
     seasonal : np.ndarray
         Seasonal component
     period : int
-        Seasonal period
+        Seasonal period (not used in simple centering, kept for compatibility)
 
     Returns
     -------
     np.ndarray
         Centered seasonal component
     """
-    n = len(seasonal)
+    # Simply subtract the overall mean to ensure seasonal has mean zero
+    # This prevents confounding with the trend
     centered = seasonal.astype(float).copy()
-
-    # Calculate mean for each season position
-    for i in range(period):
-        indices = np.arange(i, n, period)
-        if len(indices) > 0:
-            centered[indices] -= seasonal[indices].mean()
+    centered -= centered.mean()
 
     return centered

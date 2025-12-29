@@ -72,11 +72,12 @@ def test_center_seasonal():
 
     centered = center_seasonal(seasonal, period)
 
-    # Check that mean within each season position is zero
-    for i in range(period):
-        indices = np.arange(i, len(centered), period)
-        season_mean = centered[indices].mean()
-        assert abs(season_mean) < 1e-10
+    # Check that overall mean is zero (simple centering)
+    assert abs(centered.mean()) < 1e-10
+
+    # Check that the pattern is preserved (just shifted)
+    # The differences within the pattern should be the same
+    assert centered[1] - centered[0] == seasonal[1] - seasonal[0]
 
 
 def test_center_seasonal_preserves_pattern():
